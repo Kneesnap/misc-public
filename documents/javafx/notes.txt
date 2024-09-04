@@ -1,0 +1,48 @@
+File contains random notes which were helpful when working with JavaFX.
+
+To use the test apps, run the gradle task `apps > Tasks > other > appsJarWin`. (This is the default way to build the apps, and it will not include GLES)  
+
+BUILD MESH VIEWER TEST PROGRAM, AND INCLUDE OPENGLES 2:  
+`gradle apps:appsJarWin -PINCLUDE_ES2=true -PSTUB_RUNTIME_OPENJFX=24-ea+5`  
+
+Run the mesh viewer test program WITH OPENGL, IF IT WAS INCLUDED IN THE BUILD!:  
+`"C:\Program Files\Java\jdk-21\bin\java" -cp "G:\Playground\jfx\apps\toys\FX8-3DFeatures\dist\FX8-3DFeatures.jar" --module-path "G:\Playground\jfx\build\sdk\lib" --add-modules=javafx.controls,javafx.graphics -Dprism.order=es2,d3d,sw fx83dfeatures.DynamicMeshViewer`  
+
+Run the old mesh viewer program (Default Pipeline):  
+`"C:\Program Files\Java\jdk-21\bin\java" -cp "G:\Playground\jfx\apps\toys\FX8-3DFeatures\dist\FX8-3DFeatures.jar" --module-path "G:\Playground\jfx\build\sdk\lib" --add-modules=javafx.controls,javafx.graphics fx83dfeatures.PNTMeshViewer`  
+
+To do full unit tests from cygwin, do:
+```bash
+cd /cygdrive/g/Playground/jfx # or cd G:\Playground\jfx
+declare -x JAVA_HOME="C:\Program Files\Java\jdk-21"
+declare -x PATH="/usr/local/bin:/usr/bin:/cygdrive/c/Users/Drew/AppData/Local/Programs/Python/Python38-32/Scripts:/cygdrive/c/Users/Drew/AppData/Local/Programs/Python/Python38-32:/cygdrive/c/Users/Drew/AppData/Local/Microsoft/WindowsApps:/cygdrive/c/Program Files/Java/jdk-21/bin:/cygdrive/c/Path:/cygdrive/c/Program Files/Microsoft VS Code/bin:/cygdrive/c/Users/Drew/.dotnet/tools:/cygdrive/c/Users/Drew/AppData/Roaming/npm:/cygdrive/c/Program Files/heroku/bin:/cygdrive/c/Users/Drew/AppData/Local/Microsoft/WindowsApps:/cygdrive/c/Users/Drew/.dotnet/tools:/cygdrive/c/Users/Drew/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/cygdrive/c/Users/Drew/AppData/Local/Programs/Microsoft VS Code/bin:/cygdrive/c/Path/Wix:/cygdrive/c/Program Files/Git/cmd:/cygdrive/c/Program Files/Git/bin/git.exe:/cygdrive/c/cygwin64/bin"
+bash ./gradlew -PFULL_TEST=true -PUSE_ROBOT=true -PCOMPILE_WEBKIT=true -PCOMPILE_MEDIA=true all test
+./gradlew -PFULL_TEST=true -PUSE_ROBOT=true -PSTUB_RUNTIME_OPENJFX=24-ea+5 all test
+```
+
+Run only javafx.graphics tests (Various other useful stuff too 
+```bash
+./gradlew -PFULL_TEST=true -PUSE_ROBOT=true -PSTUB_RUNTIME_OPENJFX=24-ea+5 all test -x :web:test -x :base:test -x :controls:test -x :media:test -x :swing:test -x :fxml:test -x :systemTests:test
+./gradlew -PSTUB_RUNTIME_OPENJFX=24-ea+5 :graphics:test
+./gradlew -PFULL_TEST=true -PUSE_ROBOT=true -PSTUB_RUNTIME_OPENJFX=24-ea+5 all test -x :web:test
+./gradlew -PFULL_TEST=true -PUSE_ROBOT=true -PSTUB_RUNTIME_OPENJFX=24-ea+5 all test -x :web:test -x :base:test
+```
+
+Contribution Guide: https://github.com/openjdk/jfx/blob/master/CONTRIBUTING.md
+Feature Proposal Reference: https://github.com/andy-goryachev-oracle/Test/blob/main/doc/FocusTraversal/FocusTraversal.md
+
+TODO: 
+ 1) Run unit tests under OpenGL
+ 2) TriangleMesh needs to validate VertexFormat in a less-hardcoded way, otherwise we'll have a massive amount of verification code when we really only need a little.
+  -> Probably should handle negative numbers too.
+  -> Also, consider passing the real VertexFormat to BaseMesh as right now it just intuits the vertex format based on method call, which while it does work, is pretty sketchy.
+  -> These changes do not impact the public-facing API, it just makes it a lot less likely I'll screw things up in the implementation. 
+ 5) Finish/Push Implementation PR once CSR is ready.
+  -> Rebase to be the latest commit.
+  -> Prefixed with "WIP:"
+ 6) Profile on various systems, fix any issues
+
+
+
+Future implementation questions.
+TODO: Is it ok to create a test under fx83dfeatures even if it was not released with FX8? Perhaps we rename the project to no longer reference Java 8? Will need to ask them.
